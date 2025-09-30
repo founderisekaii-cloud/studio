@@ -1,17 +1,44 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  projectId: 'studio-7431626649-b1dea',
-  appId: '1:15295763075:web:ec42d22080843c786701b6',
-  apiKey: 'AIzaSyDHRUQn3vkbC-iBmHRJdMA41KtNxIaU7PQ',
-  authDomain: 'studio-7431626649-b1dea.firebaseapp.com',
-  measurementId: '',
-  messagingSenderId: '15295763075',
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
+let app;
+let auth;
+let firestore;
+let storage;
+let firebaseInitialized = false;
 
-export { app, auth };
+try {
+  if (
+    firebaseConfig.apiKey &&
+    firebaseConfig.authDomain &&
+    firebaseConfig.projectId
+  ) {
+    app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    auth = getAuth(app);
+    firestore = getFirestore(app);
+    storage = getStorage(app);
+    firebaseInitialized = true;
+    console.log("Firebase initialized successfully.");
+  } else {
+    console.warn(
+      "Firebase configuration is missing. App is running in degraded mode."
+    );
+  }
+} catch (error) {
+  console.error("Firebase initialization failed:", error);
+}
+
+export { app, auth, firestore, storage, firebaseInitialized };

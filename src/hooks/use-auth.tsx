@@ -1,14 +1,16 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, User } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, User as FirebaseUser } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { auth, firestore, firebaseInitialized } from '@/lib/firebase';
 import type { User as AppUser } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
   user: AppUser | null;
   loading: boolean;
+  firebaseInitialized: boolean;
   login: (email: string, password: string) => Promise<any>;
   signup: (email: string, password: string, name: string) => Promise<any>;
   logout: () => Promise<void>;
@@ -16,17 +18,20 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// A placeholder for fetching user role from your backend/database
-const getUserRole = async (firebaseUser: User): Promise<AppUser['role']> => {
-  // In a real application, you would fetch this from your database
-  // For example, from a 'users' collection in Firestore
-  // For this example, we'll default to 'Customer' and make the first user an 'Admin'
-  if (firebaseUser.email === 'admin@shivay.com') {
-      return 'Admin';
-  }
-  return 'Customer';
-};
+// Fetches user role from Firestore
+const getUserProfile = async (firebaseUser: FirebaseUser): Promise<AppUser | null> => {
+  if (!firebaseInitialized) return null;
+  const userDocRef = doc(firestore, 'users', firebaseUser.uid);
+  const userDoc = await getDoc(userDocRef);
 
+  if (userDoc.exists()) {
+    return userDoc.data() as AppUser;
+  }
+  // This case might happen if a user is created in Auth but not in Firestore.
+  // We can create it here or handle it as an error.
+  console.warn("No user document found in Firestore for UID:", firebaseUser.uid);
+  return null;
+};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -34,16 +39,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
+    if (!firebaseInitialized) {
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        const role = await getUserRole(firebaseUser);
-        setUser({
-          id: firebaseUser.uid,
-          name: firebaseUser.displayName || '',
-          email: firebaseUser.email || '',
-          role: role,
-          dateJoined: firebaseUser.metadata.creationTime || new Date().toISOString(),
-        });
+        const userProfile = await getUserProfile(firebaseUser);
+        setUser(userProfile);
       } else {
         setUser(null);
       }
@@ -54,36 +58,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = (email: string, password: string) => {
+    if (!firebaseInitialized) return Promise.reject(new Error('Firebase is not configured.'));
     return signInWithEmailAndPassword(auth, email, password);
   };
 
   const signup = async (email: string, password: string, name: string) => {
+    if (!firebaseInitialized) return Promise.reject(new Error('Firebase is not configured.'));
+    
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(userCredential.user, { displayName: name });
+    const firebaseUser = userCredential.user;
+    await updateProfile(firebaseUser, { displayName: name });
+
+    // Create a user document in Firestore
+    const userDocRef = doc(firestore, 'users', firebaseUser.uid);
+    const newUser: AppUser = {
+      id: firebaseUser.uid,
+      name: name,
+      email: email,
+      role: 'Customer', // Default role for new signups
+      dateJoined: new Date().toISOString(),
+    };
     
-    // You might want to create a user document in your database here
-    // with the default role
-    
-    // Re-fetch user to update the context
-    const role = await getUserRole(userCredential.user);
-    setUser({
-        id: userCredential.user.uid,
-        name: name,
-        email: email,
-        role: role,
-        dateJoined: userCredential.user.metadata.creationTime || new Date().toISOString(),
-    });
+    await setDoc(userDocRef, newUser);
+
+    setUser(newUser);
     return userCredential;
   };
 
   const logout = async () => {
+    if (!firebaseInitialized) return Promise.reject(new Error('Firebase is not configured.'));
     await signOut(auth);
     router.push('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
-      {children}
+    <AuthContext.Provider value={{ user, loading, firebaseInitialized, login, signup, logout }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

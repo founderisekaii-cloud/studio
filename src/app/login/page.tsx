@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { toast } from "@/hooks/use-toast";
 import { Icons } from "@/components/icons";
 import { useAuth } from "@/hooks/use-auth";
@@ -31,7 +32,7 @@ const formSchema = z.object({
 })
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, firebaseInitialized, loading } = useAuth();
   const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,16 +47,24 @@ export default function LoginPage() {
       await login(values.email, values.password);
       toast({
         title: "Login Successful",
-        description: "Welcome back!",
+        description: "Welcome back! Redirecting to your dashboard...",
       });
       router.push('/dashboard');
     } catch (error: any) {
       toast({
         title: "Login Failed",
-        description: error.message,
+        description: error.code === 'auth/invalid-credential' ? 'Invalid email or password.' : error.message,
         variant: "destructive",
       });
     }
+  }
+
+  if (loading) {
+    return (
+        <div className="container mx-auto flex items-center justify-center min-h-screen">
+            <Icons.Spinner className="h-12 w-12 animate-spin" />
+        </div>
+    )
   }
 
   return (
@@ -69,6 +78,14 @@ export default function LoginPage() {
           <CardDescription>Enter your credentials to access your account.</CardDescription>
         </CardHeader>
         <CardContent>
+          {!firebaseInitialized && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertTitle>Backend Services Unavailable</AlertTitle>
+              <AlertDescription>
+                The backend is not configured correctly. Authentication and database features are disabled.
+              </AlertDescription>
+            </Alert>
+          )}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
@@ -78,7 +95,7 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Email Address</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="you@example.com" {...field} />
+                      <Input type="email" placeholder="you@example.com" {...field} disabled={!firebaseInitialized} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -96,20 +113,20 @@ export default function LoginPage() {
                         </Button>
                     </div>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <Input type="password" placeholder="••••••••" {...field} disabled={!firebaseInitialized} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting || !firebaseInitialized}>
                 {form.formState.isSubmitting ? 'Logging in...' : 'Login'}
               </Button>
             </form>
           </Form>
           <div className="mt-6 text-center text-sm">
             Don't have an account?{' '}
-            <Link href="/signup" className="font-semibold text-primary hover:underline">
+            <Link href="/signup" className={`font-semibold text-primary ${!firebaseInitialized ? 'pointer-events-none text-muted-foreground' : 'hover:underline'}`}>
               Sign up
             </Link>
           </div>
