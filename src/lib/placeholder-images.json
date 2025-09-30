@@ -1,3 +1,52 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-image-1",
+      "description": "A modern library with books on shelves.",
+      "imageUrl": "https://images.unsplash.com/photo-1683178862099-325f9b29e081?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bGlicmFyeSUyMGJvb2tzfGVufDB8fHx8MTc1OTE1OTY1MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "library books"
+    },
+    {
+      "id": "about-us-image",
+      "description": "A team of people collaborating around a table.",
+      "imageUrl": "https://images.unsplash.com/photo-1566140967404-b8b3932483f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8dGVhbSUyMGNvbGxhYm9yYXRpb258ZW58MHx8fHwxNzU5MjQ5Nzg1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "team collaboration"
+    },
+    {
+      "id": "cover-1",
+      "description": "Abstract cover for 'The Genesis of Time'.",
+      "imageUrl": "https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMGFydHxlbnwwfHx8fDE3NTkxNjU1MzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract art"
+    },
+    {
+      "id": "cover-2",
+      "description": "Abstract cover for 'Echoes of the Void'.",
+      "imageUrl": "https://images.unsplash.com/photo-1570556319136-3cfc640168a4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzcGFjZSUyMG5lYnVsYXxlbnwwfHx8fDE3NTkxNDI1MzZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "space nebula"
+    },
+    {
+      "id": "cover-3",
+      "description": "Abstract cover for 'The Alchemist's Secret'.",
+      "imageUrl": "https://images.unsplash.com/photo-1748467390346-e94ad7852366?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx2aW50YWdlJTIwYWxjaGVteXxlbnwwfHx8fDE3NTkyNTI3MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "vintage alchemy"
+    },
+    {
+      "id": "cover-4",
+      "description": "Abstract cover for 'City of Whispers'.",
+      "imageUrl": "https://images.unsplash.com/photo-1502228362178-086346ac6862?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjaXR5JTIwc2t5bGluZXxlbnwwfHx8fDE3NTkxNjYxMjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "city skyline"
+    },
+    {
+      "id": "cover-5",
+      "description": "Abstract cover for 'Mountains of the Mind'.",
+      "imageUrl": "https://images.unsplash.com/photo-1622172322044-ffd81d677d32?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtb3VudGFpbiUyMHJhbmdlfGVufDB8fHx8MTc1OTIwMDcxM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mountain range"
+    },
+    {
+      "id": "cover-6",
+      "description": "Abstract cover for 'The Last Voyage'.",
+      "imageUrl": "https://images.unsplash.com/photo-1715763602029-36154b749313?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxvY2VhbiUyMHNoaXB8ZW58MHx8fHwxNzU5MjUyNzEzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ocean ship"
+    }
+  ]
 }
