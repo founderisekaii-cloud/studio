@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { Button } from "@/components/ui/button"
 import {
@@ -18,6 +19,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { toast } from "@/hooks/use-toast";
 import { Icons } from "@/components/icons";
+import { useAuth } from "@/hooks/use-auth";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -29,6 +31,8 @@ const formSchema = z.object({
 })
 
 export default function LoginPage() {
+  const { login } = useAuth();
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -37,12 +41,21 @@ export default function LoginPage() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
-    toast({
-      title: "Login Submitted",
-      description: "In a real app, this would log the user in.",
-    });
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      await login(values.email, values.password);
+      toast({
+        title: "Login Successful",
+        description: "Welcome back!",
+      });
+      router.push('/dashboard');
+    } catch (error: any) {
+      toast({
+        title: "Login Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   }
 
   return (
@@ -89,7 +102,9 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">Login</Button>
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Logging in...' : 'Login'}
+              </Button>
             </form>
           </Form>
           <div className="mt-6 text-center text-sm">

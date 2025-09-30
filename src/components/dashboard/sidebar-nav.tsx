@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname, useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   SidebarHeader,
@@ -12,7 +12,6 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
 } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -24,25 +23,24 @@ import {
   UploadCloud,
   Users,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { Suspense } from 'react';
-
-// A simple placeholder for auth state and role
-const useUser = () => {
-    // In a real app, this would come from an auth context.
-    // Roles could be 'Admin', 'Employee', 'Customer'
-    return {
-        role: 'Admin', // Change to 'Employee' or 'Customer' to test
-        name: 'Admin User',
-        email: 'admin@shivay.com',
-    }
-}
+import { useAuth } from '@/hooks/use-auth';
+import { Skeleton } from '../ui/skeleton';
 
 const NavItems = () => {
-  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const user = useUser();
+  const { user, loading, logout } = useAuth();
+
+  if (loading || !user) {
+    return (
+        <div className="p-4 space-y-4">
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
+        </div>
+    )
+  }
 
   const currentView = searchParams.get('view') || 'overview';
 
@@ -102,7 +100,7 @@ const NavItems = () => {
       <SidebarFooter>
          <SidebarMenu>
              <SidebarMenuItem>
-                <SidebarMenuButton>
+                <SidebarMenuButton onClick={logout}>
                     <LogOut className="size-4" />
                     <span>Log Out</span>
                 </SidebarMenuButton>

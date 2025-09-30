@@ -16,7 +16,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { toast } from "@/hooks/use-toast";
-import { users } from "@/lib/dummy-data";
+import { useAuth } from "@/hooks/use-auth";
+import { Skeleton } from "../ui/skeleton";
+import { useEffect } from "react";
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -26,25 +28,66 @@ const profileSchema = z.object({
 })
 
 export default function ProfilePage() {
-    // In a real app, this would be the logged-in user from context.
-    const currentUser = users[2];
+    const { user, loading } = useAuth();
 
     const form = useForm<z.infer<typeof profileSchema>>({
         resolver: zodResolver(profileSchema),
         defaultValues: {
-            name: currentUser.name || "",
-            email: currentUser.email || "",
-            affiliation: currentUser.affiliation || "",
-            phone: currentUser.phone || "",
+            name: "",
+            email: "",
+            affiliation: "",
+            phone: "",
         },
     });
 
+    useEffect(() => {
+        if (user) {
+            form.reset({
+                name: user.name || "",
+                email: user.email || "",
+                affiliation: user.affiliation || "",
+                phone: user.phone || "",
+            });
+        }
+    }, [user, form]);
+
   function onSubmit(values: z.infer<typeof profileSchema>) {
     console.log(values)
+    // Here you would typically update the user profile in your backend
     toast({
       title: "Profile Updated",
       description: "Your information has been successfully saved.",
     });
+  }
+
+  if (loading || !user) {
+    return (
+        <Card className="max-w-3xl mx-auto">
+            <CardHeader>
+                <Skeleton className="h-8 w-1/4" />
+                <Skeleton className="h-4 w-1/2" />
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                 <div className="space-y-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                 <div className="space-y-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                 <div className="space-y-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                <Skeleton className="h-10 w-full" />
+            </CardContent>
+        </Card>
+    );
   }
 
   return (

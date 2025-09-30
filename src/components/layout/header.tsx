@@ -21,6 +21,8 @@ import { Menu, User } from 'lucide-react';
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { useAuth } from '@/hooks/use-auth';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const navLinks = [
   { href: '/about', label: 'About Us' },
@@ -34,7 +36,8 @@ const navLinks = [
 export default function Header() {
   const pathname = usePathname();
   const [isSheetOpen, setSheetOpen] = useState(false);
-  const isAuthenticated = false; // Placeholder for auth state
+  const { user, loading, logout } = useAuth();
+  const isAuthenticated = !!user;
 
   const closeSheet = () => setSheetOpen(false);
 
@@ -96,14 +99,19 @@ export default function Header() {
         </div>
 
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          {isAuthenticated ? (
+          {loading ? (
+             <div className="flex items-center gap-2">
+                <Skeleton className="h-8 w-16" />
+                <Skeleton className="h-8 w-20" />
+            </div>
+          ) : isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="/avatars/01.png" alt="User avatar" />
+                    <AvatarImage src={`https://avatar.vercel.sh/${user.email}.png`} alt={user.name} />
                     <AvatarFallback>
-                      <User />
+                      {user.name?.charAt(0).toUpperCase() || <User />}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
@@ -111,9 +119,9 @@ export default function Header() {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">John Doe</p>
+                    <p className="text-sm font-medium leading-none">{user.name}</p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      customer@example.com
+                      {user.email}
                     </p>
                   </div>
                 </DropdownMenuLabel>
@@ -125,7 +133,7 @@ export default function Header() {
                   <Link href="/dashboard?view=profile">Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Log out</DropdownMenuItem>
+                <DropdownMenuItem onClick={logout}>Log out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (

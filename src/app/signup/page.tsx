@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import Link from 'next/link';
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button"
 import {
@@ -18,6 +19,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { toast } from "@/hooks/use-toast";
 import { Icons } from "@/components/icons";
+import { useAuth } from "@/hooks/use-auth";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -30,6 +32,8 @@ const formSchema = z.object({
 });
 
 export default function SignUpPage() {
+  const { signup } = useAuth();
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -40,12 +44,21 @@ export default function SignUpPage() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
-    toast({
-      title: "Account Creation Submitted",
-      description: "In a real app, this would create a new user account.",
-    });
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      await signup(values.email, values.password, values.name);
+      toast({
+        title: "Account Created",
+        description: "You have been successfully signed up.",
+      });
+      router.push('/dashboard');
+    } catch (error: any) {
+      toast({
+        title: "Sign Up Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   }
 
   return (
@@ -113,7 +126,9 @@ export default function SignUpPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">Create Account</Button>
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Creating account...' : 'Create Account'}
+              </Button>
             </form>
           </Form>
           <div className="mt-6 text-center text-sm">
